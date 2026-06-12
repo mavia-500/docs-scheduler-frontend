@@ -13,7 +13,7 @@ declare global {
 import { Booking } from "../types";
 
 const API_BASE_URL =
-  import.meta.env.VITE_API_BASE_URL ?? "http://localhost:4000/api";
+  import.meta.env.VITE_API_BASE_URL ?? "https://docs-scheduler-backend.vercel.app/api";
 
 const POLL_INTERVAL_MS = 5000; // har 5 second mein refresh
 
