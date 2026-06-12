@@ -1475,7 +1475,7 @@ export default function App() {
             Dock Scheduler
           </h1>
           <p className="text-sm text-slate-500 font-medium">
-            Terminal Hub /• {headerDateLabel}
+            Terminal Hub • {headerDateLabel}
           </p>
         </div>
         <div className="flex items-center gap-3 flex-wrap">
