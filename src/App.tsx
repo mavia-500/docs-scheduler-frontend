@@ -114,17 +114,17 @@ function LoginScreen({ onLogin, loginError }: LoginScreenProps) {
       <motion.div
         initial={{ scale: 0.9, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
-        className="w-full max-w-md rounded-3xl bg-white shadow-2xl overflow-hidden"
+        className="w-full max-w-md rounded-2xl sm:rounded-3xl bg-white shadow-2xl overflow-hidden"
       >
-        <div className="bg-slate-900 px-8 py-8 text-white">
-          <h1 className="text-2xl font-bold uppercase tracking-[0.35em]">
+        <div className="bg-slate-900 px-5 sm:px-8 py-6 sm:py-8 text-white">
+          <h1 className="text-xl sm:text-2xl font-bold uppercase tracking-[0.15em] sm:tracking-[0.35em]">
             DOCK SCHEDULER
           </h1>
           <p className="mt-2 text-sm text-slate-300">
             Terminal Operations · Secure Access
           </p>
         </div>
-        <form onSubmit={handleSubmit} className="px-8 py-8 space-y-6">
+        <form onSubmit={handleSubmit} className="px-5 sm:px-8 py-6 sm:py-8 space-y-6">
           <div className="space-y-2">
             <label
               htmlFor="username"
@@ -226,9 +226,11 @@ function WeeklyView({
     bookings.filter((b) => isSameDay(parseISO(b.startTime), date));
 
   return (
-    <div className="flex flex-col h-full overflow-hidden">
+    <div className="flex flex-col h-full overflow-hidden min-h-[280px]">
+      <div className="flex-1 overflow-auto calendar-scroll">
+        <div className="min-w-[640px]">
       <div
-        className="grid bg-slate-50/30 border-b border-slate-100 shrink-0"
+        className="grid bg-slate-50/30 border-b border-slate-100 shrink-0 sticky top-0 z-10"
         style={{ gridTemplateColumns: `80px repeat(7, 1fr)` }}
       >
         <div className="p-2 text-center text-[10px] font-bold text-slate-400 uppercase tracking-widest border-r border-slate-100 italic">
@@ -269,11 +271,11 @@ function WeeklyView({
         })}
       </div>
 
-      <div className="flex-1 overflow-y-auto">
+      <div>
         {activeDocks.map((dock) => (
           <div
             key={dock.id}
-            className="grid border-b border-slate-100 min-h-20"
+            className="grid border-b border-slate-100 min-h-16 sm:min-h-20"
             style={{ gridTemplateColumns: `80px repeat(7, 1fr)` }}
           >
             <div className="p-3 flex items-center justify-center border-r border-slate-100 bg-slate-50/30">
@@ -365,6 +367,8 @@ function WeeklyView({
           </div>
         ))}
       </div>
+        </div>
+      </div>
     </div>
   );
 }
@@ -400,18 +404,18 @@ function MonthlyView({
     bookings.filter((b) => isSameDay(parseISO(b.startTime), date));
 
   return (
-    <div className="flex flex-col h-full p-4">
-      <div className="grid grid-cols-7 mb-2">
+    <div className="flex flex-col h-full p-2 sm:p-4 min-h-[320px] overflow-y-auto calendar-scroll">
+      <div className="grid grid-cols-7 mb-1 sm:mb-2">
         {["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].map((d) => (
           <div
             key={d}
-            className="text-center text-[10px] font-black text-slate-400 uppercase tracking-widest py-1"
+            className="text-center text-[8px] sm:text-[10px] font-black text-slate-400 uppercase tracking-widest py-1"
           >
             {d}
           </div>
         ))}
       </div>
-      <div className="grid grid-cols-7 flex-1 gap-1">
+      <div className="grid grid-cols-7 flex-1 gap-0.5 sm:gap-1">
         {calDays.map((day) => {
           const inMonth = day.getMonth() === selectedDate.getMonth();
           const isWeekend = day.getDay() === 0 || day.getDay() === 6;
@@ -427,7 +431,7 @@ function MonthlyView({
             <div
               key={day.toISOString()}
               onClick={() => onDayClick(day)}
-              className={`rounded-xl p-2 flex flex-col cursor-pointer transition-all border ${
+              className={`rounded-lg sm:rounded-xl p-1 sm:p-2 flex flex-col cursor-pointer transition-all border min-h-[52px] sm:min-h-[64px] ${
                 selected
                   ? "border-indigo-400 bg-indigo-50"
                   : isHol
@@ -548,17 +552,17 @@ function SettingsModal({
   };
 
   return (
-    <div className="fixed inset-0 bg-[#141414]/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div className="fixed inset-0 bg-[#141414]/60 backdrop-blur-sm z-50 flex items-end sm:items-center justify-center p-0 sm:p-4">
       <motion.div
         initial={{ scale: 0.9, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         exit={{ scale: 0.9, opacity: 0 }}
-        className="bg-white rounded-3xl w-full max-w-xl overflow-hidden shadow-2xl"
+        className="bg-white rounded-t-3xl sm:rounded-3xl w-full max-w-xl max-h-[92vh] sm:max-h-none overflow-hidden shadow-2xl flex flex-col"
       >
         {/* Header */}
-        <div className="bg-slate-900 p-6 text-white flex justify-between items-start">
+        <div className="bg-slate-900 p-4 sm:p-6 text-white flex justify-between items-start">
           <div>
-            <h3 className="text-xl font-bold tracking-tight">SETTINGS</h3>
+            <h3 className="text-lg sm:text-xl font-bold tracking-tight">SETTINGS</h3>
             <p className="text-[10px] font-bold uppercase opacity-50 tracking-widest mt-1">
               Docks · Work Hours · Holiday Calendar
             </p>
@@ -577,7 +581,7 @@ function SettingsModal({
             <button
               key={t}
               onClick={() => setTab(t)}
-              className={`flex-1 py-3 text-xs font-bold uppercase tracking-widest transition-all ${
+              className={`flex-1 py-2.5 sm:py-3 text-[10px] sm:text-xs font-bold uppercase tracking-wider sm:tracking-widest transition-all ${
                 tab === t
                   ? "text-indigo-600 border-b-2 border-indigo-600"
                   : "text-slate-400 hover:text-slate-600"
@@ -593,7 +597,7 @@ function SettingsModal({
         </div>
 
         {/* Body */}
-        <div className="p-6 max-h-[55vh] overflow-y-auto">
+        <div className="p-4 sm:p-6 flex-1 overflow-y-auto">
           {/* ── Dock Schedules Tab ── */}
           {tab === "docks" && (
             <div className="space-y-1">
@@ -650,7 +654,7 @@ function SettingsModal({
                 Set the operating hours for all docks. Slots are generated in{" "}
                 {SLOT_DURATION_MINS}-minute intervals within this range.
               </p>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400">
                     Start Hour (0–23)
@@ -722,7 +726,7 @@ function SettingsModal({
               </p>
 
               {/* Add single date */}
-              <div className="flex gap-2">
+              <div className="flex flex-col sm:flex-row gap-2">
                 <input
                   type="date"
                   value={newHolidayDate}
@@ -732,7 +736,7 @@ function SettingsModal({
                 <button
                   onClick={addHoliday}
                   disabled={!newHolidayDate}
-                  className="px-4 py-2.5 bg-red-500 text-white rounded-xl text-xs font-bold uppercase tracking-widest hover:bg-red-600 disabled:opacity-40 transition-colors"
+                  className="px-4 py-2.5 bg-red-500 text-white rounded-xl text-xs font-bold uppercase tracking-widest hover:bg-red-600 disabled:opacity-40 transition-colors sm:shrink-0"
                 >
                   + Add
                 </button>
@@ -743,7 +747,7 @@ function SettingsModal({
                 <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-2">
                   Quick Import by Country
                 </p>
-                <div className="grid grid-cols-2 gap-2">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                   {Object.entries(PRESET_HOLIDAYS).map(([key, val]) => (
                     <button
                       key={key}
@@ -795,7 +799,7 @@ function SettingsModal({
         </div>
 
         {/* Footer */}
-        <div className="flex gap-3 p-6 border-t border-slate-100">
+        <div className="flex flex-col sm:flex-row gap-3 p-4 sm:p-6 border-t border-slate-100 shrink-0">
           <button
             onClick={onClose}
             className="flex-1 px-6 py-3 border border-slate-200 rounded-xl font-bold text-xs uppercase tracking-widest hover:bg-slate-50 transition-colors"
@@ -871,27 +875,27 @@ function AmendModal({
   };
 
   return (
-    <div className="fixed inset-0 bg-[#141414]/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div className="fixed inset-0 bg-[#141414]/60 backdrop-blur-sm z-50 flex items-end sm:items-center justify-center p-0 sm:p-4">
       <motion.div
         initial={{ scale: 0.9, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         exit={{ scale: 0.9, opacity: 0 }}
-        className="bg-white rounded-3xl w-full max-w-lg overflow-hidden shadow-2xl"
+        className="bg-white rounded-t-3xl sm:rounded-3xl w-full max-w-lg max-h-[92vh] sm:max-h-none overflow-hidden shadow-2xl flex flex-col"
       >
-        <div className="bg-amber-600 p-6 text-white">
-          <h3 className="text-xl font-bold tracking-tight">AMEND BOOKING</h3>
+        <div className="bg-amber-600 p-4 sm:p-6 text-white shrink-0">
+          <h3 className="text-lg sm:text-xl font-bold tracking-tight">AMEND BOOKING</h3>
           <p className="text-[10px] font-bold uppercase opacity-60 tracking-widest mt-1">
             ID: {booking.id} · {booking.type}
           </p>
         </div>
 
-        <div className="p-8 space-y-5 max-h-[70vh] overflow-y-auto">
+        <div className="p-5 sm:p-8 space-y-5 flex-1 overflow-y-auto">
           {/* Reschedule */}
           <div>
             <p className="text-[10px] font-bold uppercase tracking-widest text-slate-800 mb-3">
               Reschedule
             </p>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400">
                   New Date
@@ -943,7 +947,7 @@ function AmendModal({
               <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400">
                 Direction
               </label>
-              <div className="flex gap-3">
+              <div className="flex flex-col sm:flex-row gap-3">
                 <label
                   className="flex items-center gap-2 cursor-pointer flex-1 
       bg-orange-50 border border-orange-200 rounded-xl px-4 py-3"
@@ -987,7 +991,7 @@ function AmendModal({
             <p className="text-[10px] font-bold uppercase tracking-widest text-slate-800 mb-3">
               Update Details
             </p>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400 flex items-center gap-1">
                   <User className="w-3 h-3" /> Requester
@@ -1009,7 +1013,7 @@ function AmendModal({
                 />
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-4 mt-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
               <div className="space-y-2">
                 <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400 flex items-center gap-1">
                   <User className="w-3 h-3" /> Driver Name
@@ -1044,22 +1048,22 @@ function AmendModal({
           </div>
         </div>
 
-        <div className="flex gap-3 px-8 pb-8">
+        <div className="flex flex-col sm:flex-row gap-3 px-5 sm:px-8 pb-5 sm:pb-8 shrink-0">
           <button
             onClick={onClose}
-            className="flex-1 px-6 py-3 border border-slate-200 rounded-xl font-bold text-xs uppercase tracking-widest hover:bg-slate-50 transition-colors"
+            className="flex-1 px-6 py-3 border border-slate-200 rounded-xl font-bold text-xs uppercase tracking-widest hover:bg-slate-50 transition-colors order-3 sm:order-1"
           >
             Cancel
           </button>
           <button
             onClick={() => onDelete(booking.id)}
-            className="px-6 py-3 bg-red-50 text-red-600 border border-red-200 rounded-xl font-bold text-xs uppercase tracking-widest hover:bg-red-100 transition-colors flex items-center gap-2"
+            className="flex-1 sm:flex-none px-6 py-3 bg-red-50 text-red-600 border border-red-200 rounded-xl font-bold text-xs uppercase tracking-widest hover:bg-red-100 transition-colors flex items-center justify-center gap-2 order-2"
           >
             <Trash2 className="w-3.5 h-3.5" /> Delete
           </button>
           <button
             onClick={handleSave}
-            className="flex-1 px-6 py-3 bg-amber-500 text-white rounded-xl font-bold text-xs uppercase tracking-widest hover:bg-amber-600 shadow-lg shadow-amber-200 transition-all"
+            className="flex-1 px-6 py-3 bg-amber-500 text-white rounded-xl font-bold text-xs uppercase tracking-widest hover:bg-amber-600 shadow-lg shadow-amber-200 transition-all order-1 sm:order-3"
           >
             Save Changes
           </button>
@@ -1467,18 +1471,18 @@ export default function App() {
   }
 
   return (
-    <div className="min-h-screen bg-zinc-100 text-slate-900 font-sans p-6">
+    <div className="min-h-screen bg-zinc-100 text-slate-900 font-sans p-3 sm:p-4 lg:p-6">
       {/* Header */}
-      <header className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight text-slate-800 uppercase">
+      <header className="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 lg:mb-6 gap-3 md:gap-4">
+        <div className="w-full md:w-auto">
+          <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-slate-800 uppercase">
             Dock Scheduler
           </h1>
-          <p className="text-sm text-slate-500 font-medium">
+          <p className="text-xs sm:text-sm text-slate-500 font-medium">
             Terminal Hub • {headerDateLabel}
           </p>
         </div>
-        <div className="flex items-center gap-3 flex-wrap">
+        <div className="flex items-center gap-2 sm:gap-3 flex-wrap w-full md:w-auto">
           <div className="flex items-center gap-2 bg-white px-3 py-1.5 rounded-lg border border-slate-200 shadow-sm">
             <div
               className={`w-2 h-2 rounded-full ${bookings.length > 0 ? "bg-emerald-500" : "bg-amber-500"} animate-pulse`}
@@ -1495,27 +1499,27 @@ export default function App() {
             <Settings className="w-3.5 h-3.5" /> Settings
           </button>
 
-          <div className="flex bg-white rounded-xl border border-slate-200 shadow-sm p-1">
+          <div className="flex bg-white rounded-xl border border-slate-200 shadow-sm p-1 w-full sm:w-auto">
             <button
               onClick={() => setView("requester")}
-              className={`px-4 py-1.5 rounded-lg text-xs font-bold transition-all ${view === "requester" ? "bg-indigo-600 text-white" : "text-slate-400 hover:text-slate-600"}`}
+              className={`flex-1 sm:flex-none px-3 sm:px-4 py-1.5 rounded-lg text-[10px] sm:text-xs font-bold transition-all ${view === "requester" ? "bg-indigo-600 text-white" : "text-slate-400 hover:text-slate-600"}`}
             >
               BOOKING
             </button>
             <button
               onClick={() => setView("inbound")}
-              className={`px-4 py-1.5 rounded-lg text-xs font-bold transition-all ${view === "inbound" ? "bg-indigo-600 text-white" : "text-slate-400 hover:text-slate-600"}`}
+              className={`flex-1 sm:flex-none px-3 sm:px-4 py-1.5 rounded-lg text-[10px] sm:text-xs font-bold transition-all ${view === "inbound" ? "bg-indigo-600 text-white" : "text-slate-400 hover:text-slate-600"}`}
             >
               Details View
             </button>
           </div>
 
-          <div className="flex bg-white rounded-xl border border-slate-200 shadow-sm p-1">
+          <div className="flex bg-white rounded-xl border border-slate-200 shadow-sm p-1 w-full sm:w-auto">
             {(["day", "week", "month"] as const).map((v) => (
               <button
                 key={v}
                 onClick={() => setCalView(v)}
-                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all capitalize ${calView === v ? "bg-slate-800 text-white" : "text-slate-400 hover:text-slate-600"}`}
+                className={`flex-1 sm:flex-none px-2.5 sm:px-3 py-1.5 rounded-lg text-[10px] sm:text-xs font-bold transition-all capitalize ${calView === v ? "bg-slate-800 text-white" : "text-slate-400 hover:text-slate-600"}`}
               >
                 {v.toUpperCase()}
               </button>
@@ -1539,7 +1543,7 @@ export default function App() {
 
           <button
             onClick={exportToExcel}
-            className="group relative overflow-hidden rounded-2xl bg-emerald-600 px-6 py-3 text-sm font-bold uppercase tracking-wider text-white shadow-lg shadow-emerald-200 transition-all duration-300 hover:-translate-y-0.5 hover:bg-emerald-700 active:scale-[0.98] cursor-pointer"
+            className="group relative overflow-hidden rounded-2xl bg-emerald-600 px-4 sm:px-6 py-2.5 sm:py-3 text-xs sm:text-sm font-bold uppercase tracking-wider text-white shadow-lg shadow-emerald-200 transition-all duration-300 hover:-translate-y-0.5 hover:bg-emerald-700 active:scale-[0.98] cursor-pointer w-full sm:w-auto"
           >
             <span className="relative flex items-center gap-2">
               <FileText className="h-4 w-4" />
@@ -1550,10 +1554,10 @@ export default function App() {
       </header>
 
       {/* Bento Layout */}
-      <div className="grid grid-cols-12 grid-rows-6 gap-4 h-[calc(100vh-140px)]">
+      <div className="grid grid-cols-1 lg:grid-cols-12 lg:grid-rows-6 gap-3 lg:gap-4 lg:h-[calc(100vh-140px)]">
         {/* Left Column */}
-        <div className="col-span-3 row-span-6 flex flex-col gap-4">
-          <div className="flex-1 bg-white rounded-2xl border border-slate-200 p-5 shadow-sm flex flex-col justify-between">
+        <div className="lg:col-span-3 lg:row-span-6 flex flex-row lg:flex-col gap-3 lg:gap-4 overflow-x-auto lg:overflow-visible calendar-scroll pb-1 lg:pb-0 snap-x snap-mandatory lg:snap-none">
+          <div className="flex-1 min-w-[78vw] sm:min-w-[45vw] lg:min-w-0 snap-start bg-white rounded-2xl border border-slate-200 p-4 sm:p-5 shadow-sm flex flex-col justify-between">
             <div>
               <h3 className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">
                 Today's Workload
@@ -1583,7 +1587,7 @@ export default function App() {
             </div>
           </div>
 
-          <div className="flex-1 bg-emerald-500 text-white rounded-2xl p-5 shadow-sm flex flex-col justify-between">
+          <div className="flex-1 min-w-[78vw] sm:min-w-[45vw] lg:min-w-0 snap-start bg-emerald-500 text-white rounded-2xl p-4 sm:p-5 shadow-sm flex flex-col justify-between">
             <div>
               <div className="flex justify-between items-start mb-2">
                 <h3 className="text-[10px] font-bold uppercase tracking-widest opacity-80">
@@ -1606,7 +1610,7 @@ export default function App() {
             </button>
           </div>
 
-          <div className="flex-1 bg-white rounded-2xl border border-slate-200 p-5 shadow-sm overflow-hidden flex flex-col">
+          <div className="flex-1 min-w-[78vw] sm:min-w-[45vw] lg:min-w-0 snap-start bg-white rounded-2xl border border-slate-200 p-4 sm:p-5 shadow-sm overflow-hidden flex flex-col min-h-[180px] lg:min-h-0">
             <h3 className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-4">
               Operations Log
             </h3>
@@ -1649,15 +1653,15 @@ export default function App() {
         </div>
 
         {/* Center Column */}
-        <div className="col-span-6 row-span-6 bg-white rounded-2xl border border-slate-200 shadow-sm flex flex-col overflow-hidden">
-          <div className="p-4 border-b border-slate-100 bg-slate-50/50 flex justify-between items-center shrink-0">
-            <h3 className="text-xs font-bold text-slate-700 uppercase tracking-wider">
+        <div className="lg:col-span-6 lg:row-span-6 bg-white rounded-2xl border border-slate-200 shadow-sm flex flex-col overflow-hidden min-h-[420px] lg:min-h-0">
+          <div className="p-3 sm:p-4 border-b border-slate-100 bg-slate-50/50 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 sm:gap-3 shrink-0">
+            <h3 className="text-[10px] sm:text-xs font-bold text-slate-700 uppercase tracking-wider">
               {calView === "day" && "Dock Availability (30m Intervals)"}
               {calView === "week" && "Weekly Overview — All Docks"}
               {calView === "month" &&
                 `Monthly Overview — ${format(selectedDate, "MMMM yyyy")}`}
             </h3>
-            <div className="flex gap-4 text-[9px] font-bold text-slate-500 tracking-wider">
+            <div className="flex flex-wrap gap-x-3 gap-y-1.5 text-[8px] sm:text-[9px] font-bold text-slate-500 tracking-wider">
               <div className="flex items-center gap-1.5">
                 <span className="w-2.5 h-2.5 rounded-full bg-orange-100 border border-orange-400" />{" "}
                 INBOUND
@@ -1683,37 +1687,40 @@ export default function App() {
 
           {/* Day View */}
           {calView === "day" && (
-            <>
-              <div
-                className="grid bg-slate-50/30 border-b border-slate-100 shrink-0"
-                style={{
-                  gridTemplateColumns: `80px repeat(${activeDocks.length}, 1fr)`,
-                }}
-              >
-                <div className="p-2 text-center text-[10px] font-bold text-slate-400 uppercase tracking-widest border-r border-slate-100 italic">
-                  TIME
-                </div>
-                {activeDocks.map((dock) => (
-                  <div
-                    key={dock.id}
-                    className="p-2 text-center text-[10px] font-black text-slate-500 uppercase tracking-widest border-r border-slate-100 last:border-r-0"
-                  >
-                    {dock.name}
+            <div className="flex-1 flex flex-col overflow-hidden min-h-0">
+              <div className="overflow-x-auto calendar-scroll shrink-0 border-b border-slate-100">
+                <div
+                  className="grid bg-slate-50/30"
+                  style={{
+                    minWidth: `${80 + activeDocks.length * 72}px`,
+                    gridTemplateColumns: `80px repeat(${activeDocks.length}, minmax(72px, 1fr))`,
+                  }}
+                >
+                  <div className="p-2 text-center text-[10px] font-bold text-slate-400 uppercase tracking-widest border-r border-slate-100 italic">
+                    TIME
                   </div>
-                ))}
+                  {activeDocks.map((dock) => (
+                    <div
+                      key={dock.id}
+                      className="p-2 text-center text-[10px] font-black text-slate-500 uppercase tracking-widest border-r border-slate-100 last:border-r-0"
+                    >
+                      {dock.name}
+                    </div>
+                  ))}
+                </div>
               </div>
 
-              <div className="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-slate-200 relative">
+              <div className="flex-1 overflow-auto calendar-scroll relative">
                 {/* Weekend Overlay */}
                 {isWeekendDay && (
-                  <div className="absolute inset-0 z-20 bg-slate-50/80 backdrop-blur-[2px] flex flex-col items-center justify-center p-12 text-center">
-                    <div className="w-16 h-16 bg-slate-200 rounded-full flex items-center justify-center mb-4">
-                      <Calendar className="w-8 h-8 text-slate-400" />
+                  <div className="absolute inset-0 z-20 bg-slate-50/80 backdrop-blur-[2px] flex flex-col items-center justify-center p-6 sm:p-12 text-center">
+                    <div className="w-12 h-12 sm:w-16 sm:h-16 bg-slate-200 rounded-full flex items-center justify-center mb-4">
+                      <Calendar className="w-6 h-6 sm:w-8 sm:h-8 text-slate-400" />
                     </div>
-                    <h4 className="text-lg font-bold text-slate-800 uppercase tracking-tight">
+                    <h4 className="text-base sm:text-lg font-bold text-slate-800 uppercase tracking-tight">
                       Terminal Closed
                     </h4>
-                    <p className="text-sm text-slate-500 mt-2 max-w-xs leading-relaxed">
+                    <p className="text-xs sm:text-sm text-slate-500 mt-2 max-w-xs leading-relaxed px-4">
                       Dock operations are only available Monday through Friday.
                     </p>
                   </div>
@@ -1721,27 +1728,30 @@ export default function App() {
 
                 {/* Holiday Overlay */}
                 {!isWeekendDay && isHolidayDay && (
-                  <div className="absolute inset-0 z-20 bg-red-50/90 backdrop-blur-[2px] flex flex-col items-center justify-center p-12 text-center">
-                    <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mb-4">
-                      <Calendar className="w-8 h-8 text-red-400" />
+                  <div className="absolute inset-0 z-20 bg-red-50/90 backdrop-blur-[2px] flex flex-col items-center justify-center p-6 sm:p-12 text-center">
+                    <div className="w-12 h-12 sm:w-16 sm:h-16 bg-red-100 rounded-full flex items-center justify-center mb-4">
+                      <Calendar className="w-6 h-6 sm:w-8 sm:h-8 text-red-400" />
                     </div>
-                    <h4 className="text-lg font-bold text-red-700 uppercase tracking-tight">
+                    <h4 className="text-base sm:text-lg font-bold text-red-700 uppercase tracking-tight">
                       Holiday — Terminal Closed
                     </h4>
-                    <p className="text-sm text-red-400 mt-2 max-w-xs leading-relaxed">
+                    <p className="text-xs sm:text-sm text-red-400 mt-2 max-w-xs leading-relaxed px-4">
                       {format(selectedDate, "MMMM do, yyyy")} is a scheduled
                       holiday. No bookings available.
                     </p>
                   </div>
                 )}
 
+                <div
+                  style={{ minWidth: `${80 + activeDocks.length * 72}px` }}
+                >
                 {timeSlots.map((time) => (
                   <div
                     key={time.toISOString()}
                     className="border-b border-slate-100 last:border-0 group min-h-12"
                     style={{
                       display: "grid",
-                      gridTemplateColumns: `80px repeat(${activeDocks.length}, 1fr)`,
+                      gridTemplateColumns: `80px repeat(${activeDocks.length}, minmax(72px, 1fr))`,
                     }}
                   >
                     <div
@@ -1883,8 +1893,9 @@ export default function App() {
                     })}
                   </div>
                 ))}
+                </div>
               </div>
-            </>
+            </div>
           )}
 
           {calView === "week" && (
@@ -1911,13 +1922,13 @@ export default function App() {
         </div>
 
         {/* Right Column */}
-        <div className="col-span-3 row-span-6 flex flex-col gap-4">
-          <div className="flex-2 bg-slate-900 text-white rounded-2xl p-6 shadow-xl flex flex-col">
-            <div className="mb-6">
+        <div className="lg:col-span-3 lg:row-span-6 flex flex-col gap-3 lg:gap-4 min-h-0">
+          <div className="flex-1 lg:flex-2 bg-slate-900 text-white rounded-2xl p-4 sm:p-6 shadow-xl flex flex-col min-h-[280px] lg:min-h-0">
+            <div className="mb-4 sm:mb-6">
               <h3 className="text-[10px] font-bold text-indigo-400 uppercase tracking-widest mb-1">
                 Slot Intelligence
               </h3>
-              <div className="text-xl font-bold tracking-tight">
+              <div className="text-lg sm:text-xl font-bold tracking-tight">
                 Active Selection
               </div>
               <p className="text-[10px] text-slate-400 mt-1 uppercase font-semibold">
@@ -2052,7 +2063,7 @@ export default function App() {
             </div>
           </div>
 
-          <div className="flex-1 bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
+          <div className="flex-1 bg-white rounded-2xl border border-slate-200 p-4 sm:p-5 shadow-sm shrink-0">
             <div className="flex items-center justify-between gap-3 mb-3">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 bg-indigo-100 rounded-xl flex items-center justify-center text-indigo-600 font-black">
@@ -2095,19 +2106,19 @@ export default function App() {
       <AnimatePresence>
         {/* Booking Modal */}
         {isBookingModalOpen && (
-          <div className="fixed inset-0 overflow-y-auto bg-[#141414]/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="fixed inset-0 overflow-y-auto bg-[#141414]/60 backdrop-blur-sm z-50 flex items-end sm:items-center justify-center p-0 sm:p-4">
             <motion.div
               initial={{ scale: 0.9, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.9, opacity: 0 }}
-              className="bg-white rounded-3xl w-full max-w-lg overflow-hidden shadow-2xl"
+              className="bg-white rounded-t-3xl sm:rounded-3xl w-full max-w-lg max-h-[92vh] sm:max-h-none overflow-hidden shadow-2xl flex flex-col"
             >
-              <div className="bg-slate-900 p-6 text-white">
-                <h3 className="text-xl font-bold tracking-tight">
+              <div className="bg-slate-900 p-4 sm:p-6 text-white shrink-0">
+                <h3 className="text-lg sm:text-xl font-bold tracking-tight">
                   CREATE BOOKING
                 </h3>
 
-                <div className="flex gap-4 mt-2 text-[10px] font-black uppercase opacity-60 tracking-widest">
+                <div className="flex flex-col sm:flex-row sm:flex-wrap gap-2 sm:gap-4 mt-2 text-[10px] font-black uppercase opacity-60 tracking-widest">
                   <div className="flex items-center gap-2">
                     <LayoutDashboard className="w-3 h-3" />
                     {docks.find((d) => d.id === selectedSlot?.dockId)?.name}
@@ -2133,14 +2144,14 @@ export default function App() {
               </div>
               <form
                 onSubmit={handleBooking}
-                className="p-8 space-y-6 overflow-y-auto relative z-100"
+                className="p-5 sm:p-8 space-y-5 sm:space-y-6 overflow-y-auto relative z-100 flex-1"
               >
                 <div className="space-y-2">
                   <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400 flex items-center gap-2">
                     + <Truck className="w-3 h-3" /> Direction
                   </label>
 
-                  <div className="flex gap-3">
+                  <div className="flex flex-col sm:flex-row gap-3">
                     <label
                       className="flex items-center gap-2 cursor-pointer flex-1 
     bg-orange-50 border border-orange-200 rounded-xl px-4 py-3"
@@ -2173,7 +2184,7 @@ export default function App() {
                     </label>
                   </div>
                 </div>
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400 flex items-center gap-2">
                       <User className="w-3 h-3" />
@@ -2219,7 +2230,7 @@ export default function App() {
                   <h4 className="text-[10px] font-bold uppercase tracking-widest text-slate-800">
                     Operational Details
                   </h4>
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400 flex items-center gap-2">
                         <User className="w-3 h-3" />
@@ -2258,7 +2269,7 @@ export default function App() {
                     />
                   </div>
                 </div>
-                <div className="flex gap-3 pt-4">
+                <div className="flex flex-col sm:flex-row gap-3 pt-4">
                   <button
                     type="button"
                     onClick={() => setIsBookingModalOpen(false)}
@@ -2280,15 +2291,15 @@ export default function App() {
 
         {/* AI Modal */}
         {isAIModalOpen && (
-          <div className="fixed inset-0 bg-[#141414]/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="fixed inset-0 bg-[#141414]/60 backdrop-blur-sm z-50 flex items-end sm:items-center justify-center p-0 sm:p-4">
             <motion.div
               initial={{ scale: 0.9, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.9, opacity: 0 }}
-              className="bg-white rounded-3xl w-full max-w-lg overflow-hidden shadow-2xl"
+              className="bg-white rounded-t-3xl sm:rounded-3xl w-full max-w-lg max-h-[92vh] sm:max-h-none overflow-hidden shadow-2xl flex flex-col"
             >
-              <div className="bg-indigo-600 p-6 text-white">
-                <h3 className="text-xl font-bold tracking-tight uppercase">
+              <div className="bg-indigo-600 p-4 sm:p-6 text-white shrink-0">
+                <h3 className="text-lg sm:text-xl font-bold tracking-tight uppercase">
                   AI PLANNING SYNC
                 </h3>
                 <p className="text-[10px] font-black uppercase tracking-widest opacity-70 mt-1">
@@ -2302,14 +2313,14 @@ export default function App() {
                 {/* </p> */}
               </div>
 
-              <div className="p-8 space-y-6">
+              <div className="p-5 sm:p-8 space-y-5 sm:space-y-6 flex-1 overflow-y-auto">
                 <textarea
                   value={aiInput}
                   onChange={(e) => setAiInput(e.target.value)}
-                  className="w-full h-40 bg-slate-50 border border-slate-200 rounded-2xl p-4 text-xs font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500/20 resize-none text-slate-600 leading-relaxed"
+                  className="w-full h-32 sm:h-40 bg-slate-50 border border-slate-200 rounded-2xl p-4 text-xs font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500/20 resize-none text-slate-600 leading-relaxed"
                   placeholder="08:00 AB Logistics 2 trucks..."
                 />
-                <div className="flex gap-3">
+                <div className="flex flex-col sm:flex-row gap-3">
                   <button
                     disabled={isExtracting}
                     onClick={() => setIsAIModalOpen(false)}
