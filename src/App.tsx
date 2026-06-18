@@ -1460,7 +1460,7 @@ export default function App() {
       }
     } catch (error) {
       console.error("Extraction error:", error);
-      alert("Failed to connect to AI. Please check your API key.");
+      alert("Failed to connect to AI. Model is busy in unlimited requests");
     } finally {
       setIsExtracting(false);
     }
@@ -1713,7 +1713,13 @@ export default function App() {
               <div className="flex-1 overflow-auto calendar-scroll relative">
                 {/* Weekend Overlay */}
                 {isWeekendDay && (
-                  <div className="absolute inset-0 z-20 bg-slate-50/80 backdrop-blur-[2px] flex flex-col items-center justify-center p-6 sm:p-12 text-center">
+                  <div
+                    className="absolute top-0 left-0 z-20 bg-slate-50/95 backdrop-blur-[2px] flex flex-col items-center justify-center p-6 sm:p-12 text-center"
+                    style={{
+                      width: `max(100%, ${80 + activeDocks.length * 72}px)`,
+                      minHeight: `${timeSlots.length * 48}px`,
+                    }}
+                  >
                     <div className="w-12 h-12 sm:w-16 sm:h-16 bg-slate-200 rounded-full flex items-center justify-center mb-4">
                       <Calendar className="w-6 h-6 sm:w-8 sm:h-8 text-slate-400" />
                     </div>
