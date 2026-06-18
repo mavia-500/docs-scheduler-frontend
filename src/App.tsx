@@ -1506,7 +1506,7 @@ export default function App() {
               onClick={() => setView("inbound")}
               className={`px-4 py-1.5 rounded-lg text-xs font-bold transition-all ${view === "inbound" ? "bg-indigo-600 text-white" : "text-slate-400 hover:text-slate-600"}`}
             >
-              Docs Details
+              Details View
             </button>
           </div>
 
