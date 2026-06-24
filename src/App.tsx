@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState, useMemo, useEffect } from "react";
+import React, { useState, useMemo, useEffect, useRef, useCallback } from "react";
 import * as XLSX from "xlsx";
 import {
   Calendar,
@@ -24,6 +24,9 @@ import {
   Edit,
   Trash2,
   X,
+  Upload,
+  FileUp,
+  CheckCircle,
 } from "lucide-react";
 import {
   format,
@@ -44,7 +47,7 @@ import {
   isToday,
 } from "date-fns";
 import { motion, AnimatePresence } from "motion/react";
-import { extractPlanningFromText } from "./services/geminiService";
+import { extractPlanningFromText, extractPlanningFromFile } from "./services/geminiService";
 import {
   fetchBookings,
   createBookings,
@@ -1138,6 +1141,15 @@ export default function App() {
   const [isExtracting, setIsExtracting] = useState(false);
   const [apiError, setApiError] = useState<string | null>(null);
 
+  // Document sync modal state
+  const [isDocModalOpen, setIsDocModalOpen] = useState(false);
+  const [docFile, setDocFile] = useState<File | null>(null);
+  const [docDragOver, setDocDragOver] = useState(false);
+  const [docError, setDocError] = useState<string | null>(null);
+  const [docExtracting, setDocExtracting] = useState(false);
+  const [docPreview, setDocPreview] = useState<string | null>(null);
+  const docFileInputRef = useRef<HTMLInputElement>(null);
+
   useEffect(() => {
     let ws: WebSocket | null = null;
     let mounted = true;
@@ -1391,6 +1403,86 @@ export default function App() {
     setSelectedSlot(null);
   };
 
+  const resetDocModal = useCallback(() => {
+    setDocFile(null);
+    setDocError(null);
+    setDocPreview(null);
+    setDocDragOver(false);
+    if (docFileInputRef.current) docFileInputRef.current.value = "";
+  }, []);
+
+  const acceptDocFile = useCallback((file: File | undefined | null) => {
+    if (!file) return;
+    const maxMB = 10;
+    if (file.size > maxMB * 1024 * 1024) {
+      setDocError(`File is too large. Maximum size is ${maxMB} MB.`);
+      return;
+    }
+    const ext = file.name.split(".").pop()?.toLowerCase() ?? "";
+    const allowed = ["xlsx", "xls", "csv", "txt", "pdf", "png", "jpg", "jpeg", "webp"];
+    if (!allowed.includes(ext) && !file.type.startsWith("image/")) {
+      setDocError(`Unsupported type ".${ext}". Allowed: Excel, CSV, TXT, PDF, or image.`);
+      return;
+    }
+    setDocFile(file);
+    setDocError(null);
+    setDocPreview(null);
+  }, []);
+
+  const handleDocSync = async () => {
+    if (!docFile) return;
+    setDocExtracting(true);
+    setDocError(null);
+    try {
+      const extractedData = await extractPlanningFromFile(docFile);
+
+      if (!extractedData || extractedData.length === 0) {
+        setDocError("The AI couldn't find any booking details in the document. Try a different file.");
+        return;
+      }
+
+      const payloads: BookingCreatePayload[] = [];
+      extractedData.forEach((item: any) => {
+        const truckCount = Math.max(1, item.truckCount || 1);
+        const [h, m] = (item.suggestedTime || "09:00").split(":").map(Number);
+        const baseStart = new Date(selectedDate);
+        baseStart.setHours(h, m, 0, 0);
+
+        for (let i = 0; i < truckCount; i++) {
+          const dockIndex = (payloads.length + bookings.length) % activeDocks.length;
+          const dock = activeDocks[dockIndex] || activeDocks[0];
+          if (dock) {
+            payloads.push({
+              dockId: dock.id,
+              startTime: baseStart.toISOString(),
+              endTime: addMinutes(baseStart, SLOT_DURATION_MINS).toISOString(),
+              requesterName: item.requesterName || "Unknown Carrier",
+              truckReference: item.truckReference || `DOC-${Math.random().toString(36).toUpperCase().slice(0, 4)}`,
+              driverName: item.driverName || "TBD",
+              driverPhone: item.driverPhone || "N/A",
+              licensePlate: item.licensePlate || "PENDING",
+              type: "automatic",
+              direction: item.direction ?? "inbound",
+            });
+          }
+        }
+      });
+
+      const createdBookings = await createBookings(payloads);
+      setBookings((prev) => dedupeBookings([...prev, ...createdBookings]));
+      setIsDocModalOpen(false);
+      resetDocModal();
+    } catch (error) {
+      if (error instanceof BookingConflictError) {
+        setDocError(error.message);
+      } else {
+        setDocError(error instanceof Error ? error.message : "Failed to process document.");
+      }
+    } finally {
+      setDocExtracting(false);
+    }
+  };
+
   const handleAIExtract = async () => {
     setIsExtracting(true);
     try {
@@ -1602,12 +1694,21 @@ export default function App() {
                 lists.
               </p>
             </div>
-            <button
-              onClick={() => setIsAIModalOpen(true)}
-              className="w-full bg-white text-emerald-600 py-2.5 rounded-xl text-xs font-bold shadow-lg hover:bg-emerald-50 transition-colors"
-            >
-              SYNC FROM DOCUMENT
-            </button>
+            <div className="flex flex-col gap-2 mt-2">
+              <button
+                onClick={() => setIsAIModalOpen(true)}
+                className="w-full bg-white text-emerald-600 py-2.5 rounded-xl text-xs font-bold shadow-lg hover:bg-emerald-50 transition-colors flex items-center justify-center gap-2"
+              >
+                BOOKINGS THROUGH AI
+              </button>
+              <button
+                onClick={() => { resetDocModal(); setIsDocModalOpen(true); }}
+                className="w-full bg-emerald-700/60 border border-white/30 text-white py-2.5 rounded-xl text-xs font-bold hover:bg-emerald-700 transition-colors flex items-center justify-center gap-2"
+              >
+                <FileUp className="w-3.5 h-3.5" />
+                SYNC FROM DOCUMENT
+              </button>
+            </div>
           </div>
 
           <div className="flex-1 min-w-[78vw] sm:min-w-[45vw] lg:min-w-0 snap-start bg-white rounded-2xl border border-slate-200 p-4 sm:p-5 shadow-sm overflow-hidden flex flex-col min-h-[180px] lg:min-h-0">
@@ -2346,6 +2447,161 @@ export default function App() {
                       </>
                     ) : (
                       "Execute Sync"
+                    )}
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        )}
+
+        {/* Document Sync Modal */}
+        {isDocModalOpen && (
+          <div className="fixed inset-0 bg-[#141414]/60 backdrop-blur-sm z-50 flex items-end sm:items-center justify-center p-0 sm:p-4">
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              className="bg-white rounded-t-3xl sm:rounded-3xl w-full max-w-lg max-h-[92vh] overflow-hidden shadow-2xl flex flex-col"
+            >
+              {/* Header */}
+              <div className="bg-emerald-600 p-4 sm:p-6 text-white shrink-0">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h3 className="text-lg sm:text-xl font-bold tracking-tight uppercase flex items-center gap-2">
+                      <FileUp className="w-5 h-5" />
+                      Sync from Document
+                    </h3>
+                    <p className="text-[10px] font-black uppercase tracking-widest opacity-70 mt-1">
+                      Upload a file — AI extracts & books slots automatically
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => { setIsDocModalOpen(false); resetDocModal(); }}
+                    className="p-1.5 hover:bg-emerald-700 rounded-lg transition-colors"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+
+              {/* Body */}
+              <div className="p-5 sm:p-8 space-y-5 flex-1 overflow-y-auto">
+
+                {/* Hidden file input */}
+                <input
+                  ref={docFileInputRef}
+                  type="file"
+                  className="hidden"
+                  accept=".xlsx,.xls,.csv,.txt,.pdf,.png,.jpg,.jpeg,.webp"
+                  onChange={(e) => acceptDocFile(e.target.files?.[0])}
+                />
+
+                {/* Drop zone */}
+                {!docFile ? (
+                  <button
+                    type="button"
+                    disabled={docExtracting}
+                    onClick={() => docFileInputRef.current?.click()}
+                    onDragOver={(e) => { e.preventDefault(); setDocDragOver(true); }}
+                    onDragLeave={() => setDocDragOver(false)}
+                    onDrop={(e) => {
+                      e.preventDefault();
+                      setDocDragOver(false);
+                      acceptDocFile(e.dataTransfer.files?.[0]);
+                    }}
+                    className={`w-full rounded-2xl border-2 border-dashed p-8 sm:p-12 text-center transition-all cursor-pointer disabled:opacity-50 ${
+                      docDragOver
+                        ? "border-emerald-500 bg-emerald-50"
+                        : "border-slate-200 bg-slate-50 hover:border-emerald-400 hover:bg-emerald-50/50"
+                    }`}
+                  >
+                    <div className="mx-auto mb-4 w-14 h-14 rounded-full bg-emerald-100 flex items-center justify-center">
+                      <Upload className="w-6 h-6 text-emerald-600" />
+                    </div>
+                    <p className="text-sm font-bold text-slate-700">
+                      {docDragOver ? "Drop file here" : "Click to browse or drag & drop"}
+                    </p>
+                    <p className="mt-2 text-[10px] font-medium uppercase tracking-wider text-slate-400">
+                      Excel · CSV · TXT · PDF · Image
+                    </p>
+                    <p className="mt-1 text-[10px] text-slate-400">Max 10 MB</p>
+                  </button>
+                ) : (
+                  /* File selected preview */
+                  <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-4 flex items-center gap-4">
+                    <div className="w-12 h-12 shrink-0 rounded-xl bg-emerald-100 flex items-center justify-center">
+                      <CheckCircle className="w-6 h-6 text-emerald-600" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-bold text-emerald-800 truncate">{docFile.name}</p>
+                      <p className="text-[10px] text-emerald-600 mt-0.5">
+                        {(docFile.size / 1024).toFixed(1)} KB · Ready for AI processing
+                      </p>
+                    </div>
+                    <button
+                      onClick={resetDocModal}
+                      disabled={docExtracting}
+                      className="shrink-0 p-1.5 hover:bg-emerald-200 rounded-lg transition-colors disabled:opacity-50"
+                      title="Remove file"
+                    >
+                      <X className="w-4 h-4 text-emerald-700" />
+                    </button>
+                  </div>
+                )}
+
+                {/* Supported formats info */}
+                <div className="rounded-xl bg-slate-50 border border-slate-100 px-4 py-3">
+                  <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-2">
+                    How it works
+                  </p>
+                  <ul className="space-y-1">
+                    {[
+                      "Upload your planning sheet or manifest",
+                      "AI reads the document and finds all bookings",
+                      "Slots are created automatically on the selected date",
+                    ].map((step, i) => (
+                      <li key={i} className="flex items-start gap-2 text-[10px] text-slate-500">
+                        <span className="shrink-0 w-4 h-4 rounded-full bg-emerald-100 text-emerald-700 font-black flex items-center justify-center text-[8px]">
+                          {i + 1}
+                        </span>
+                        {step}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+
+                {/* Error */}
+                {docError && (
+                  <div className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+                    {docError}
+                  </div>
+                )}
+
+                {/* Actions */}
+                <div className="flex flex-col sm:flex-row gap-3">
+                  <button
+                    disabled={docExtracting}
+                    onClick={() => { setIsDocModalOpen(false); resetDocModal(); }}
+                    className="flex-1 px-6 py-3 border border-slate-200 rounded-xl font-bold text-xs uppercase tracking-widest hover:bg-slate-50 transition-colors disabled:opacity-50"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    disabled={docExtracting || !docFile}
+                    onClick={handleDocSync}
+                    className="flex-1 px-6 py-3 bg-emerald-600 text-white rounded-xl font-bold text-xs uppercase tracking-widest hover:bg-emerald-700 shadow-lg shadow-emerald-200 transition-all disabled:opacity-50 flex items-center justify-center gap-2"
+                  >
+                    {docExtracting ? (
+                      <>
+                        <div className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                        Processing...
+                      </>
+                    ) : (
+                      <>
+                        <FileUp className="w-3.5 h-3.5" />
+                        Extract &amp; Book
+                      </>
                     )}
                   </button>
                 </div>
