@@ -883,7 +883,7 @@ function AmendModal({
         initial={{ scale: 0.9, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         exit={{ scale: 0.9, opacity: 0 }}
-        className="bg-white rounded-t-3xl sm:rounded-3xl w-full max-w-lg max-h-[92vh] sm:max-h-none overflow-hidden shadow-2xl flex flex-col"
+        className="bg-white rounded-t-3xl sm:rounded-3xl w-full max-w-lg max-h-[92vh] overflow-hidden shadow-2xl flex flex-col"
       >
         <div className="bg-amber-600 p-4 sm:p-6 text-white shrink-0">
           <h3 className="text-lg sm:text-xl font-bold tracking-tight">AMEND BOOKING</h3>
@@ -892,7 +892,7 @@ function AmendModal({
           </p>
         </div>
 
-        <div className="p-5 sm:p-8 space-y-5 flex-1 overflow-y-auto">
+        <div className="p-5 sm:p-8 space-y-5 overflow-y-auto flex-1 min-h-0">
           {/* Reschedule */}
           <div>
             <p className="text-[10px] font-bold uppercase tracking-widest text-slate-800 mb-3">
